@@ -192,18 +192,18 @@
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-                            Momentum Total ($p$)
+                            Momentum Total (p)
                         </h3>
                         <span class="text-[10px] uppercase font-bold tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">kg·m/s</span>
                     </div>
                     
                     <div class="space-y-2 text-xs">
                         <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
-                            <span class="text-slate-500">Sebelum ($p_{awal}$):</span>
+                            <span class="text-slate-500">Sebelum (p awal):</span>
                             <span id="valPInitial" class="font-mono font-semibold text-slate-800">0.00 kg·m/s</span>
                         </div>
                         <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
-                            <span class="text-slate-500">Saat Ini / Akhir ($p_{akhir}$):</span>
+                            <span class="text-slate-500">Saat Ini / Akhir (p akhir):</span>
                             <span id="valPCurrent" class="font-mono font-bold text-indigo-600">0.00 kg·m/s</span>
                         </div>
                     </div>
@@ -219,24 +219,24 @@
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                            Energi Kinetik Total ($EK$)
+                            Energi Kinetik Total (EK)
                         </h3>
                         <span class="text-[10px] uppercase font-bold tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Joule</span>
                     </div>
                     
                     <div class="space-y-2 text-xs">
                         <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
-                            <span class="text-slate-500">Sebelum ($EK_{awal}$):</span>
+                            <span class="text-slate-500">Sebelum (EK awal):</span>
                             <span id="valEkInitial" class="font-mono font-semibold text-slate-800">0.000 J</span>
                         </div>
                         <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
-                            <span class="text-slate-500">Saat Ini / Akhir ($EK_{akhir}$):</span>
+                            <span class="text-slate-500">Saat Ini / Akhir (EK akhir):</span>
                             <span id="valEkCurrent" class="font-mono font-bold text-amber-600">0.000 J</span>
                         </div>
                     </div>
 
                     <div class="mt-3 text-[11px] text-slate-500 border-t border-slate-100 pt-2 flex items-center justify-between">
-                        <span>Energi Hilang ($\Delta EK$):</span>
+                        <span>Energi Hilang (ΔEK):</span>
                         <span id="valEkLost" class="font-mono font-semibold text-rose-600">0.000 J (0%)</span>
                     </div>
                 </div>
@@ -256,7 +256,7 @@
                     <!-- Velocity Benda 1 -->
                     <div class="border border-slate-200 rounded-xl p-3 bg-indigo-50/30">
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="font-semibold text-indigo-900">Benda 1 ($v_1'$ akhir)</span>
+                            <span class="font-semibold text-indigo-900">Benda 1 (v1' akhir)</span>
                             <span id="v1PrimeDisplay" class="font-mono font-bold text-indigo-600">0.00 m/s</span>
                         </div>
                         <p class="text-[11px] text-slate-500" id="v1DirectionText">Arah: Diam</p>
@@ -265,7 +265,7 @@
                     <!-- Velocity Benda 2 -->
                     <div class="border border-slate-200 rounded-xl p-3 bg-emerald-50/30">
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="font-semibold text-emerald-900">Benda 2 ($v_2'$ akhir)</span>
+                            <span class="font-semibold text-emerald-900">Benda 2 (v2' akhir)</span>
                             <span id="v2PrimeDisplay" class="font-mono font-bold text-emerald-600">0.00 m/s</span>
                         </div>
                         <p class="text-[11px] text-slate-500" id="v2DirectionText">Arah: Diam</p>
@@ -315,7 +315,6 @@
             scale: 20 // 1 meter = 20 pixels
         };
 
-        let recordedLogs = [];
         let animationFrameId = null;
 
         // Elements Setup
@@ -342,6 +341,7 @@
 
         function resizeCanvas() {
             const container = canvas.parentElement;
+            if (!container) return;
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
             if (!simState.isRunning) {
@@ -352,13 +352,16 @@
         function setupEventListeners() {
             const bindInput = (id, key, labelId) => {
                 const el = document.getElementById(id);
+                if (!el) return;
                 el.addEventListener('input', (e) => {
                     simState[key] = parseFloat(e.target.value);
-                    if (labelId) {
-                        document.getElementById(labelId).innerText = simState[key].toFixed(1);
+                    const labelEl = document.getElementById(labelId);
+                    if (labelEl) {
+                        labelEl.innerText = simState[key].toFixed(1);
                     }
                     if (key === 'e') {
-                        document.getElementById('val-e').innerText = simState.e.toFixed(2);
+                        const valE = document.getElementById('val-e');
+                        if (valE) valE.innerText = simState.e.toFixed(2);
                         updatePresetBadgeName();
                     }
                     calculatePhysics();
@@ -399,7 +402,7 @@
         }
 
         function updateDashboard() {
-            const { m1, m2, v1, v2, v1Prime, v2Prime, e } = simState;
+            const { m1, m2, v1, v2, v1Prime, v2Prime } = simState;
 
             // Momentum
             const pBefore = (m1 * v1) + (m2 * v2);
@@ -540,7 +543,7 @@
 
                 const summaryText = document.getElementById('collisionSummaryText');
                 if (summaryText) {
-                    summaryText.innerText = `Tumbukan terjadi! Benda 1 bergerak dengan v₁' = ${simState.v1Prime.toFixed(2)} m/s, Benda 2 bergerak dengan v₂' = ${simState.v2Prime.toFixed(2)} m/s.`;
+                    summaryText.innerText = `Tumbukan terjadi! Benda 1 bergerak dengan v1' = ${simState.v1Prime.toFixed(2)} m/s, Benda 2 bergerak dengan v2' = ${simState.v2Prime.toFixed(2)} m/s.`;
                 }
             }
 
@@ -592,7 +595,7 @@
                 simState.radius1, 
                 '#38bdf8', 
                 '#0284c7', 
-                'm₁ = ' + simState.m1 + 'kg',
+                'm1 = ' + simState.m1 + 'kg',
                 simState.currentV1
             );
 
@@ -603,7 +606,7 @@
                 simState.radius2, 
                 '#34d399', 
                 '#059669', 
-                'm₂ = ' + simState.m2 + 'kg',
+                'm2 = ' + simState.m2 + 'kg',
                 simState.currentV2
             );
         }
@@ -665,97 +668,6 @@
                 ctx.fillStyle = '#f59e0b';
                 ctx.fill();
             }
-        }
-
-        // --- LKPD Log Data Table Handling ---
-        function recordData() {
-            const { m1, m2, v1, v2, v1Prime, v2Prime, e, presetName } = simState;
-
-            const pBefore = (m1 * v1) + (m2 * v2);
-            const pAfter = (m1 * v1Prime) + (m2 * v2Prime);
-
-            const ekBefore = 0.5 * m1 * v1 * v1 + 0.5 * m2 * v2 * v2;
-            const ekAfter = 0.5 * m1 * v1Prime * v1Prime + 0.5 * m2 * v2Prime * v2Prime;
-
-            const newEntry = {
-                no: recordedLogs.length + 1,
-                preset: presetName,
-                masses: `${m1.toFixed(1)} ; ${m2.toFixed(1)}`,
-                vInitial: `${v1.toFixed(1)} ; ${v2.toFixed(1)}`,
-                vFinal: `${v1Prime.toFixed(2)} ; ${v2Prime.toFixed(2)}`,
-                p: `${pBefore.toFixed(2)} / ${pAfter.toFixed(2)}`,
-                ek: `${ekBefore.toFixed(1)} / ${ekAfter.toFixed(1)}`
-            };
-
-            recordedLogs.push(newEntry);
-            renderTable();
-            showToast('Data berhasil dicatat ke Tabel LKPD!');
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            
-            if (recordedLogs.length === 0) {
-                tbody.innerHTML = `
-                    <tr id="empty-row" class="text-center text-slate-500 font-sans italic">
-                        <td colspan="7" class="py-6">Belum ada data percobaan yang dicatat. Klik "Catat LKPD" setelah melakukan simulasi.</td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tbody.innerHTML = recordedLogs.map(item => `
-                <tr class="hover:bg-slate-700/30 transition-colors">
-                    <td class="p-2.5 font-bold text-indigo-400">${item.no}</td>
-                    <td class="p-2.5 font-sans font-medium text-slate-200">${item.preset}</td>
-                    <td class="p-2.5 text-slate-300">${item.masses}</td>
-                    <td class="p-2.5 text-sky-300">${item.vInitial}</td>
-                    <td class="p-2.5 text-emerald-300">${item.vFinal}</td>
-                    <td class="p-2.5 text-slate-300">${item.p}</td>
-                    <td class="p-2.5 text-amber-300">${item.ek}</td>
-                </tr>
-            `).join('');
-        }
-
-        function clearTable() {
-            recordedLogs = [];
-            renderTable();
-            showToast('Tabel data dibersihkan.');
-        }
-
-        function copyTableToClipboard() {
-            if (recordedLogs.length === 0) {
-                showToast('Tidak ada data untuk disalin!');
-                return;
-            }
-
-            let text = "No\tJenis/Material\tm1;m2 (kg)\tv1;v2 (m/s)\tv1';v2' (m/s)\tp_awal/p_akhir\tEK_awal/EK_akhir\n";
-            recordedLogs.forEach(row => {
-                text += `${row.no}\t${row.preset}\t${row.masses}\t${row.vInitial}\t${row.vFinal}\t${row.p}\t${row.ek}\n`;
-            });
-
-            // Use execCommand for iframe safety
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-
-            showToast('Tabel berhasil disalin ke clipboard!');
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            
-            toast.classList.remove('opacity-0', 'translate-y-5', 'pointer-events-none');
-            toast.classList.add('opacity-100', 'translate-y-0');
-
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-5', 'pointer-events-none');
-            }, 2500);
         }
     </script>
 </body>
