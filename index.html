@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Fisika: LKPD Jenis-Jenis Tumbukan</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js untuk visualisasi data grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-800/80 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-600 rounded-lg">
+                    <i class="fa-solid fa-atom text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-white">Simulasi LKPD: Jenis-Jenis Tumbukan</h1>
+                    <p class="text-xs text-slate-400">Media Pembelajaran Interaktif Hukum Kekekalan Momentum & Energi</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="btnHelp" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 text-slate-200">
+                    <i class="fa-solid fa-circle-question text-indigo-400"></i>
+                    <span>Petunjuk LKPD</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Controls & Presets (4 Cols) -->
+        <section class="lg:col-span-4 space-y-5 flex flex-col">
+            
+            <!-- Preset Material LKPD -->
+            <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-md">
+                <h2 class="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-indigo-400"></i> 1. Pilih Material (Sesuai Percobaan LKPD)
+                </h2>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="applyPreset('kelereng')" id="presetKelereng" class="preset-btn p-2.5 rounded-lg border border-indigo-500/50 bg-indigo-950/40 hover:bg-indigo-900/50 text-left transition text-xs flex flex-col justify-between">
+                        <span class="font-semibold text-indigo-300 block mb-1">🔴 Kelereng</span>
+                        <span class="text-[10px] text-slate-400">Lenting Sempurna (e = 1.0)</span>
+                    </button>
+                    <button onclick="applyPreset('bekel')" id="presetBekel" class="preset-btn p-2.5 rounded-lg border border-slate-700 bg-slate-900/50 hover:bg-slate-700/50 text-left transition text-xs flex flex-col justify-between">
+                        <span class="font-semibold text-emerald-300 block mb-1">🟢 Bola Bekel</span>
+                        <span class="text-[10px] text-slate-400">Lenting Sebagian (e = 0.6)</span>
+                    </button>
+                    <button onclick="applyPreset('plastisin')" id="presetPlastisin" class="preset-btn p-2.5 rounded-lg border border-slate-700 bg-slate-900/50 hover:bg-slate-700/50 text-left transition text-xs flex flex-col justify-between">
+                        <span class="font-semibold text-amber-300 block mb-1">🟡 Plastisin</span>
+                        <span class="text-[10px] text-slate-400">Tidak Lenting (e = 0.0)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Parameters Setup -->
+            <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-md space-y-4 flex-1">
+                <h2 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-indigo-400"></i> 2. Parameter Tumbukan
+                </h2>
+
+                <!-- Jarak Awal (LKPD Specific) -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Jarak Awal Percobaan (Sesuai LKPD):</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setDistance(10)" id="dist10" class="dist-btn py-1.5 px-2 text-xs rounded bg-indigo-600 text-white font-medium">10 cm</button>
+                        <button onclick="setDistance(20)" id="dist20" class="dist-btn py-1.5 px-2 text-xs rounded bg-slate-700 text-slate-300 hover:bg-slate-600">20 cm</button>
+                        <button onclick="setDistance(30)" id="dist30" class="dist-btn py-1.5 px-2 text-xs rounded bg-slate-700 text-slate-300 hover:bg-slate-600">30 cm</button>
+                    </div>
+                </div>
+
+                <hr class="border-slate-700 my-2">
+
+                <!-- Object 1 (Benda A) Controls -->
+                <div class="space-y-2 bg-slate-900/60 p-3 rounded-lg border border-slate-700/50">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-sky-400 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span> Benda A (Bergerak)
+                        </span>
+                        <span id="valM1" class="font-mono text-slate-300">m₁ = 0.10 kg</span>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Massa ($m_1$):</span>
+                            <span id="lblM1">0.10 kg</span>
+                        </div>
+                        <input type="range" id="inputM1" min="0.05" max="0.5" step="0.01" value="0.10" class="w-full accent-sky-400 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Kecepatan Awal ($v_1$):</span>
+                            <span id="lblV1">2.0 m/s</span>
+                        </div>
+                        <input type="range" id="inputV1" min="0.5" max="5.0" step="0.1" value="2.0" class="w-full accent-sky-400 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Object 2 (Benda B) Controls -->
+                <div class="space-y-2 bg-slate-900/60 p-3 rounded-lg border border-slate-700/50">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-rose-400 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block"></span> Benda B (Target/Diam)
+                        </span>
+                        <span id="valM2" class="font-mono text-slate-300">m₂ = 0.10 kg</span>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Massa ($m_2$):</span>
+                            <span id="lblM2">0.10 kg</span>
+                        </div>
+                        <input type="range" id="inputM2" min="0.05" max="0.5" step="0.01" value="0.10" class="w-full accent-rose-400 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Kecepatan Awal ($v_2$):</span>
+                            <span id="lblV2">0.0 m/s</span>
+                        </div>
+                        <input type="range" id="inputV2" min="-3.0" max="3.0" step="0.1" value="0.0" class="w-full accent-rose-400 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Restitution Factor Slider -->
+                <div>
+                    <div class="flex justify-between text-xs text-slate-300 mb-1 font-medium">
+                        <span>Koefisien Restitusi ($e$):</span>
+                        <span id="lblE" class="font-mono text-indigo-400 font-bold">1.00</span>
+                    </div>
+                    <input type="range" id="inputE" min="0" max="1" step="0.05" value="1.0" class="w-full accent-indigo-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                        <span>Tidak Lenting (0)</span>
+                        <span>Sebagian (0.1-0.9)</span>
+                        <span>Sempurna (1)</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Right Column: Canvas, Controls, Realtime Data & Graphs (8 Cols) -->
+        <section class="lg:col-span-8 space-y-5 flex flex-col">
+
+            <!-- Interactive Canvas & Playback Controls -->
+            <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-md flex flex-col">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <h2 class="text-sm font-semibold text-slate-200">Area Visualisasi Simulasi Tumbukan</h2>
+                    </div>
+                    <span id="simStatus" class="text-xs px-2.5 py-0.5 rounded bg-slate-700 text-slate-300 font-mono">Siap</span>
+                </div>
+
+                <!-- Simulation Canvas Container -->
+                <div class="relative w-full h-64 bg-slate-950 rounded-lg overflow-hidden border border-slate-800 flex items-center justify-center">
+                    <canvas id="simCanvas" class="w-full h-full block"></canvas>
+                    
+                    <!-- Overlay Notification / State -->
+                    <div id="collisionAlert" class="hidden absolute top-3 bg-amber-500/90 text-slate-950 px-3 py-1 rounded-full font-bold text-xs shadow-lg animate-bounce">
+                        💥 Tumbukan Terjadi!
+                    </div>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mt-4">
+                    <div class="flex items-center space-x-2">
+                        <button id="btnStart" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg transition flex items-center gap-1.5 shadow-md">
+                            <i class="fa-solid fa-play"></i> Mulai
+                        </button>
+                        <button id="btnPause" disabled class="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-semibold text-xs rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-pause"></i> Jeda
+                        </button>
+                        <button id="btnReset" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold text-xs rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <!-- Speed Modifier -->
+                    <div class="flex items-center space-x-2 text-xs text-slate-400">
+                        <span>Kecepatan Simulasi:</span>
+                        <select id="simSpeed" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg p-1.5 focus:ring-indigo-500">
+                            <option value="0.25">0.25x (Lambat)</option>
+                            <option value="0.5">0.5x</option>
+                            <option value="1.0" selected>1.0x (Normal)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Realtime Calculations & Data Table -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- Physical Quantities Live Table -->
+                <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-md">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-indigo-400"></i> Hasil Perhitungan Fisika
+                    </h3>
+                    
+                    <div class="space-y-2 text-xs">
+                        <!-- Kecepatan Akhir -->
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50 space-y-1">
+                            <span class="text-slate-400 block font-medium">Kecepatan Setelah Tumbukan:</span>
+                            <div class="flex justify-between font-mono">
+                                <span class="text-sky-300">v₁' = <strong id="resV1">--</strong> m/s</span>
+                                <span class="text-rose-300">v₂' = <strong id="resV2">--</strong> m/s</span>
+                            </div>
+                        </div>
+
+                        <!-- Momentum Total -->
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50 space-y-1">
+                            <span class="text-slate-400 block font-medium">Momentum Total (p = m · v):</span>
+                            <div class="flex justify-between font-mono">
+                                <span>Sebelum: <strong id="resPbefore" class="text-slate-200">--</strong> kg m/s</span>
+                                <span>Sesudah: <strong id="resPafter" class="text-indigo-400">--</strong> kg m/s</span>
+                            </div>
+                        </div>
+
+                        <!-- Energi Kinetik Total -->
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50 space-y-1">
+                            <span class="text-slate-400 block font-medium">Energi Kinetik Total (EK = ½m v²):</span>
+                            <div class="flex justify-between font-mono">
+                                <span>Sebelum: <strong id="resEKbefore" class="text-slate-200">--</strong> J</span>
+                                <span>Sesudah: <strong id="resEKafter" class="text-emerald-400">--</strong> J</span>
+                            </div>
+                            <div class="text-[11px] text-amber-400/90 pt-0.5 flex justify-between">
+                                <span>Energi Hilang:</span>
+                                <span id="resEKloss" class="font-mono">-- J (0%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Energy & Momentum Comparison Chart -->
+                <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-md flex flex-col">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column text-indigo-400"></i> Perbandingan Energi & Momentum
+                    </h3>
+                    <div class="flex-1 relative min-h-[160px] flex items-center justify-center">
+                        <canvas id="physicsChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Observations Log for Student LKPD Fill-in -->
+            <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-md">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-table text-indigo-400"></i> Log Tabel Catatan LKPD Siswa
+                    </h3>
+                    <button id="btnClearLog" class="text-[11px] text-slate-400 hover:text-rose-400 transition">
+                        <i class="fa-solid fa-trash-can"></i> Bersihkan Log
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                                <th class="p-2 font-medium">No</th>
+                                <th class="p-2 font-medium">Material / Jenis</th>
+                                <th class="p-2 font-medium">Jarak</th>
+                                <th class="p-2 font-medium">Kondisi Setelah Tumbukan</th>
+                                <th class="p-2 font-medium">v₁' (m/s)</th>
+                                <th class="p-2 font-medium">v₂' (m/s)</th>
+                                <th class="p-2 font-medium">EK Total Awal → Akhir</th>
+                                <th class="p-2 font-medium">Menyatu?</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody" class="divide-y divide-slate-700/50 text-slate-300">
+                            <tr>
+                                <td colspan="8" class="p-3 text-center text-slate-500 italic">Belum ada percobaan yang diselesaikan. Klik "Mulai" untuk mencatat log otomatis.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Modal Instructions for Students -->
+    <div id="helpModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-indigo-400"></i> Petunjuk Pengisian LKPD
+                </h3>
+                <button id="btnCloseModal" class="text-slate-400 hover:text-white text-lg">&times;</button>
+            </div>
+            <div class="text-xs text-slate-300 space-y-2.5 leading-relaxed">
+                <p>Gunakan simulasi ini untuk melengkapi Percobaan 1, 2, dan 3 pada LKPD Fisika Anda:</p>
+                <ol class="list-decimal list-inside space-y-1.5 text-slate-300">
+                    <li><strong class="text-indigo-300">Percobaan 1 (Kelereng):</strong> Pilih preset <em>Kelereng</em>. Atur Jarak Awal (10cm, 20cm, 30cm) lalu jalankan simulasi. Amati kondisi kedua kelereng setelah tumbukan.</li>
+                    <li><strong class="text-emerald-300">Percobaan 2 (Bola Bekel):</strong> Pilih preset <em>Bola Bekel</em>. Amati elastisitas tumbukan lenting sebagian ($e = 0.6$).</li>
+                    <li><strong class="text-amber-300">Percobaan 3 (Plastisin):</strong> Pilih preset <em>Plastisin</em> ($e = 0$). Perhatikan bagaimana kedua bola plastisin menempel/menyatu setelah bertumbukan.</li>
+                    <li>Catat hasil $v_1'$, $v_2'$, Momentum, dan Energi Kinetik pada tabel data LKPD Anda.</li>
+                </ol>
+            </div>
+            <div class="pt-2 text-right">
+                <button id="btnGotIt" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Physics & Interactive App Engine -->
+    <script>
+        // State Application Data
+        const state = {
+            preset: 'kelereng', // kelereng, bekel, plastisin
+            distanceCm: 10,
+            m1: 0.10,
+            v1: 2.0,
+            m2: 0.10,
+            v2: 0.0,
+            e: 1.0,
+            
+            // Simulation physics states
+            isRunning: false,
+            isPaused: false,
+            hasCollided: false,
+            timeScale: 1.0,
+
+            // Ball objects positions (in Canvas pixels)
+            ball1: { x: 0, y: 0, r: 20, v: 0, color: '#38bdf8', label: 'A' },
+            ball2: { x: 0, y: 0, r: 20, v: 0, color: '#fb7185', label: 'B' },
+            
+            // Calculated post-collision values
+            v1_prime: 0,
+            v2_prime: 0,
+            stuckTogether: false,
+
+            // Log history
+            logCount: 0
+        };
+
+        // Material Presets Config
+        const presets = {
+            kelereng: { e: 1.0, name: '🔴 Kelereng', colorA: '#38bdf8', colorB: '#fb7185', radius: 18 },
+            bekel: { e: 0.6, name: '🟢 Bola Bekel', colorA: '#34d399', colorB: '#f43f5e', radius: 22 },
+            plastisin: { e: 0.0, name: '🟡 Plastisin', colorA: '#fbbf24', colorB: '#a3e635', radius: 24 }
+        };
+
+        // DOM Elements
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        let chartInstance = null;
+
+        // Init Chart.js
+        function initChart() {
+            const chartCtx = document.getElementById('physicsChart').getContext('2d');
+            chartInstance = new Chart(chartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['EK (Joules)', 'Momentum (kg·m/s)'],
+                    datasets: [
+                        {
+                            label: 'Sebelum Tumbukan',
+                            data: [0, 0],
+                            backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Sesudah Tumbukan',
+                            data: [0, 0],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { size: 10 } } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8', font: { size: 9 } },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8', font: { size: 10 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Calculate Physics Post-Collision Values
+        function computePhysics() {
+            const m1 = state.m1;
+            const m2 = state.m2;
+            const v1 = state.v1;
+            const v2 = state.v2;
+            const e = state.e;
+
+            // Conservation of Momentum & Coefficient of Restitution Formulas:
+            // v1' = (m1*v1 + m2*v2 - m2*e*(v1 - v2)) / (m1 + m2)
+            // v2' = (m1*v1 + m2*v2 + m1*e*(v1 - v2)) / (m1 + m2)
+
+            const v1_prime = ((m1 * v1 + m2 * v2) - m2 * e * (v1 - v2)) / (m1 + m2);
+            const v2_prime = ((m1 * v1 + m2 * v2) + m1 * e * (v1 - v2)) / (m1 + m2);
+
+            state.v1_prime = v1_prime;
+            state.v2_prime = v2_prime;
+
+            // Calculations for UI
+            const p1 = m1 * v1;
+            const p2 = m2 * v2;
+            const pTotalBefore = p1 + p2;
+
+            const p1_after = m1 * v1_prime;
+            const p2_after = m2 * v2_prime;
+            const pTotalAfter = p1_after + p2_after;
+
+            const ek1 = 0.5 * m1 * v1 * v1;
+            const ek2 = 0.5 * m2 * v2 * v2;
+            const ekTotalBefore = ek1 + ek2;
+
+            const ek1_after = 0.5 * m1 * v1_prime * v1_prime;
+            const ek2_after = 0.5 * m2 * v2_prime * v2_prime;
+            const ekTotalAfter = ek1_after + ek2_after;
+
+            const ekLoss = Math.max(0, ekTotalBefore - ekTotalAfter);
+            const ekLossPct = ekTotalBefore > 0 ? ((ekLoss / ekTotalBefore) * 100).toFixed(1) : 0;
+
+            // Update UI elements
+            document.getElementById('resV1').textContent = v1_prime.toFixed(2);
+            document.getElementById('resV2').textContent = v2_prime.toFixed(2);
+            document.getElementById('resPbefore').textContent = pTotalBefore.toFixed(2);
+            document.getElementById('resPafter').textContent = pTotalAfter.toFixed(2);
+            document.getElementById('resEKbefore').textContent = ekTotalBefore.toFixed(2);
+            document.getElementById('resEKafter').textContent = ekTotalAfter.toFixed(2);
+            document.getElementById('resEKloss').textContent = `${ekLoss.toFixed(2)} J (${ekLossPct}%)`;
+
+            // Update Chart
+            if (chartInstance) {
+                chartInstance.data.datasets[0].data = [ekTotalBefore.toFixed(2), pTotalBefore.toFixed(2)];
+                chartInstance.data.datasets[1].data = [ekTotalAfter.toFixed(2), pTotalAfter.toFixed(2)];
+                chartInstance.update();
+            }
+        }
+
+        // Setup Initial Positions on Canvas based on distance (10cm, 20cm, 30cm)
+        function resetPositions() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            const centerY = canvas.height / 2;
+            const presetCfg = presets[state.preset];
+
+            // Scale conversion: 10cm -> 120px, 20cm -> 200px, 30cm -> 280px
+            const pxDistance = 40 + state.distanceCm * 8;
+            
+            const centerX = canvas.width / 2;
+            
+            state.ball1.r = presetCfg.radius;
+            state.ball1.color = presetCfg.colorA;
+            state.ball1.x = centerX - (pxDistance / 2);
+            state.ball1.y = centerY;
+            state.ball1.v = state.v1;
+
+            state.ball2.r = presetCfg.radius;
+            state.ball2.color = presetCfg.colorB;
+            state.ball2.x = centerX + (pxDistance / 2);
+            state.ball2.y = centerY;
+            state.ball2.v = state.v2;
+
+            state.hasCollided = false;
+            state.stuckTogether = false;
+
+            document.getElementById('collisionAlert').classList.add('hidden');
+            document.getElementById('simStatus').textContent = 'Siap';
+            document.getElementById('simStatus').className = 'text-xs px-2.5 py-0.5 rounded bg-slate-700 text-slate-300 font-mono';
+
+            computePhysics();
+            drawCanvas();
+        }
+
+        // Draw Simulation Canvas Scene
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerY = canvas.height / 2;
+
+            // Draw Track / Surface
+            ctx.beginPath();
+            ctx.moveTo(20, centerY + 25);
+            ctx.lineTo(canvas.width - 20, centerY + 25);
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Draw Ruler / Distance Markers
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px Inter';
+            for (let x = 30; x < canvas.width - 30; x += 40) {
+                ctx.fillRect(x, centerY + 25, 1, 6);
+            }
+
+            // Distance Line indicator between balls before collision
+            if (!state.hasCollided) {
+                ctx.beginPath();
+                ctx.moveTo(state.ball1.x, centerY - 40);
+                ctx.lineTo(state.ball2.x, centerY - 40);
+                ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = '#818cf8';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Jarak Awal: ${state.distanceCm} cm`, (state.ball1.x + state.ball2.x) / 2, centerY - 46);
+            }
+
+            // Draw Ball A
+            drawBall(state.ball1);
+
+            // Draw Ball B
+            drawBall(state.ball2);
+        }
+
+        // Helper to draw single ball & velocity vector arrow
+        function drawBall(ball) {
+            ctx.save();
+            
+            // Ball Shadow
+            ctx.beginPath();
+            ctx.ellipse(ball.x, ball.y + ball.r - 2, ball.r * 0.8, 5, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fill();
+
+            // Ball Body
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Text Label inside ball
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 11px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(ball.label, ball.x, ball.y);
+
+            // Velocity Arrow Indicator
+            if (Math.abs(ball.v) > 0.05) {
+                const arrowLength = ball.v * 15;
+                const arrowY = ball.y - ball.r - 12;
+
+                ctx.beginPath();
+                ctx.moveTo(ball.x, arrowY);
+                ctx.lineTo(ball.x + arrowLength, arrowY);
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Arrowhead
+                const headDir = ball.v > 0 ? 1 : -1;
+                ctx.beginPath();
+                ctx.moveTo(ball.x + arrowLength, arrowY);
+                ctx.lineTo(ball.x + arrowLength - (6 * headDir), arrowY - 4);
+                ctx.lineTo(ball.x + arrowLength - (6 * headDir), arrowY + 4);
+                ctx.fillStyle = '#f59e0b';
+                ctx.fill();
+
+                // Velocity value text
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '10px Inter';
+                ctx.fillText(`${ball.v.toFixed(1)} m/s`, ball.x + (arrowLength / 2), arrowY - 8);
+            }
+
+            ctx.restore();
+        }
+
+        // Animation Loop
+        let lastTime = 0;
+        function updateSim(timestamp) {
+            if (!state.isRunning || state.isPaused) return;
+
+            if (!lastTime) lastTime = timestamp;
+            const dt = Math.min((timestamp - lastTime) / 1000, 0.05) * state.timeScale;
+            lastTime = timestamp;
+
+            const pScale = 50; // speed to pixel scale ratio
+
+            // Move Balls
+            state.ball1.x += state.ball1.v * pScale * dt;
+            state.ball2.x += state.ball2.v * pScale * dt;
+
+            // Check Collision
+            const dist = Math.abs(state.ball2.x - state.ball1.x);
+            const minDist = state.ball1.r + state.ball2.r;
+
+            if (!state.hasCollided && dist <= minDist) {
+                state.hasCollided = true;
+
+                // Adjust overlap
+                const overlap = minDist - dist;
+                state.ball1.x -= overlap / 2;
+                state.ball2.x += overlap / 2;
+
+                // Apply new post-collision velocities
+                state.ball1.v = state.v1_prime;
+                state.ball2.v = state.v2_prime;
+
+                // If e == 0 (Tidak lenting sama sekali / Plastisin), stick together
+                if (state.e === 0) {
+                    state.stuckTogether = true;
+                }
+
+                // Show visual alert
+                document.getElementById('collisionAlert').classList.remove('hidden');
+                document.getElementById('simStatus').textContent = 'Tumbukan!';
+                document.getElementById('simStatus').className = 'text-xs px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono border border-amber-500/30';
+
+                // Log entry into table
+                addLogEntry();
+            }
+
+            // Keep stuck together if plastic collision
+            if (state.stuckTogether) {
+                const avgX = (state.ball1.x + state.ball2.x) / 2;
+                state.ball1.x = avgX - state.ball1.r;
+                state.ball2.x = avgX + state.ball2.r;
+            }
+
+            // Bounds check to stop simulation when off-screen
+            if (state.ball1.x < -50 || state.ball1.x > canvas.width + 50 ||
+                state.ball2.x < -50 || state.ball2.x > canvas.width + 50) {
+                pauseSim();
+                document.getElementById('simStatus').textContent = 'Selesai';
+            }
+
+            drawCanvas();
+            requestAnimationFrame(updateSim);
+        }
+
+        // Control Actions
+        function startSim() {
+            if (state.isRunning && !state.isPaused) return;
+
+            if (!state.isRunning) {
+                resetPositions();
+            }
+
+            state.isRunning = true;
+            state.isPaused = false;
+            lastTime = 0;
+
+            document.getElementById('btnStart').disabled = true;
+            document.getElementById('btnPause').disabled = false;
+            document.getElementById('btnStart').classList.add('opacity-50');
+
+            requestAnimationFrame(updateSim);
+        }
+
+        function pauseSim() {
+            state.isPaused = true;
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnPause').disabled = true;
+            document.getElementById('btnStart').classList.remove('opacity-50');
+            document.getElementById('simStatus').textContent = 'Dijeda';
+        }
+
+        function resetSim() {
+            state.isRunning = false;
+            state.isPaused = false;
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnPause').disabled = true;
+            document.getElementById('btnStart').classList.remove('opacity-50');
+            resetPositions();
+        }
+
+        // Preset Apply
+        function applyPreset(key) {
+            state.preset = key;
+            const presetCfg = presets[key];
+
+            // Highlight button UI
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500/50', 'bg-indigo-950/40');
+                btn.classList.add('border-slate-700', 'bg-slate-900/50');
+            });
+
+            if (key === 'kelereng') {
+                document.getElementById('presetKelereng').classList.add('border-indigo-500/50', 'bg-indigo-950/40');
+                state.e = 1.0;
+            } else if (key === 'bekel') {
+                document.getElementById('presetBekel').classList.add('border-indigo-500/50', 'bg-indigo-950/40');
+                state.e = 0.6;
+            } else if (key === 'plastisin') {
+                document.getElementById('presetPlastisin').classList.add('border-indigo-500/50', 'bg-indigo-950/40');
+                state.e = 0.0;
+            }
+
+            document.getElementById('inputE').value = state.e;
+            document.getElementById('lblE').textContent = state.e.toFixed(2);
+
+            resetSim();
+        }
+
+        function setDistance(dist) {
+            state.distanceCm = dist;
+            document.querySelectorAll('.dist-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.add('bg-slate-700', 'text-slate-300');
+            });
+
+            const activeBtn = document.getElementById(`dist${dist}`);
+            activeBtn.classList.remove('bg-slate-700', 'text-slate-300');
+            activeBtn.classList.add('bg-indigo-600', 'text-white');
+
+            resetSim();
+        }
+
+        // Add Log Entry to Observation Table
+        function addLogEntry() {
+            state.logCount++;
+            const tbody = document.getElementById('logTableBody');
+
+            // Clear placeholder row on first entry
+            if (state.logCount === 1) {
+                tbody.innerHTML = '';
+            }
+
+            const presetCfg = presets[state.preset];
+            let descKondisi = '';
+            let isStuckText = 'Tidak';
+
+            if (state.e === 1.0) {
+                descKondisi = 'Memantul Sempurna (Terpisah)';
+            } else if (state.e === 0) {
+                descKondisi = 'Menempel / Diam Bersama';
+                isStuckText = 'Ya (Menyatu)';
+            } else {
+                descKondisi = 'Memantul dengan Kecepatan Berkurang';
+            }
+
+            const ekAwal = (0.5 * state.m1 * state.v1 * state.v1 + 0.5 * state.m2 * state.v2 * state.v2).toFixed(2);
+            const ekAkhir = (0.5 * state.m1 * state.v1_prime * state.v1_prime + 0.5 * state.m2 * state.v2_prime * state.v2_prime).toFixed(2);
+
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-700/30 transition';
+            row.innerHTML = `
+                <td class="p-2 font-mono text-slate-400">${state.logCount}</td>
+                <td class="p-2 font-semibold">${presetCfg.name}</td>
+                <td class="p-2">${state.distanceCm} cm</td>
+                <td class="p-2 text-slate-300">${descKondisi}</td>
+                <td class="p-2 font-mono text-sky-300">${state.v1_prime.toFixed(2)}</td>
+                <td class="p-2 font-mono text-rose-300">${state.v2_prime.toFixed(2)}</td>
+                <td class="p-2 font-mono">${ekAwal} J → ${ekAkhir} J</td>
+                <td class="p-2 font-medium ${state.e === 0 ? 'text-amber-400' : 'text-slate-400'}">${isStuckText}</td>
+            `;
+
+            tbody.prepend(row);
+        }
+
+        // Event Listeners for Input Controls
+        document.getElementById('inputM1').addEventListener('input', (e) => {
+            state.m1 = parseFloat(e.target.value);
+            document.getElementById('lblM1').textContent = `${state.m1.toFixed(2)} kg`;
+            document.getElementById('valM1').textContent = `m₁ = ${state.m1.toFixed(2)} kg`;
+            resetSim();
+        });
+
+        document.getElementById('inputV1').addEventListener('input', (e) => {
+            state.v1 = parseFloat(e.target.value);
+            document.getElementById('lblV1').textContent = `${state.v1.toFixed(1)} m/s`;
+            resetSim();
+        });
+
+        document.getElementById('inputM2').addEventListener('input', (e) => {
+            state.m2 = parseFloat(e.target.value);
+            document.getElementById('lblM2').textContent = `${state.m2.toFixed(2)} kg`;
+            document.getElementById('valM2').textContent = `m₂ = ${state.m2.toFixed(2)} kg`;
+            resetSim();
+        });
+
+        document.getElementById('inputV2').addEventListener('input', (e) => {
+            state.v2 = parseFloat(e.target.value);
+            document.getElementById('lblV2').textContent = `${state.v2.toFixed(1)} m/s`;
+            resetSim();
+        });
+
+        document.getElementById('inputE').addEventListener('input', (e) => {
+            state.e = parseFloat(e.target.value);
+            document.getElementById('lblE').textContent = state.e.toFixed(2);
+            
+            // Adjust preset selection highlight if manual e slider moved
+            if (state.e === 1.0) applyPreset('kelereng');
+            else if (state.e === 0.0) applyPreset('plastisin');
+            else {
+                document.querySelectorAll('.preset-btn').forEach(btn => {
+                    btn.classList.remove('border-indigo-500/50', 'bg-indigo-950/40');
+                    btn.classList.add('border-slate-700', 'bg-slate-900/50');
+                });
+                resetSim();
+            }
+        });
+
+        document.getElementById('simSpeed').addEventListener('change', (e) => {
+            state.timeScale = parseFloat(e.target.value);
+        });
+
+        document.getElementById('btnStart').addEventListener('click', startSim);
+        document.getElementById('btnPause').addEventListener('click', pauseSim);
+        document.getElementById('btnReset').addEventListener('click', resetSim);
+
+        document.getElementById('btnClearLog').addEventListener('click', () => {
+            state.logCount = 0;
+            document.getElementById('logTableBody').innerHTML = `
+                <tr>
+                    <td colspan="8" class="p-3 text-center text-slate-500 italic">Belum ada percobaan yang diselesaikan. Klik "Mulai" untuk mencatat log otomatis.</td>
+                </tr>
+            `;
+        });
+
+        // Modal Help Controls
+        const modal = document.getElementById('helpModal');
+        document.getElementById('btnHelp').addEventListener('click', () => modal.classList.remove('hidden'));
+        document.getElementById('btnCloseModal').addEventListener('click', () => modal.classList.add('hidden'));
+        document.getElementById('btnGotIt').addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            resetPositions();
+        });
+
+        // Initialize App on Load
+        window.onload = () => {
+            initChart();
+            resetPositions();
+        };
+    </script>
+</body>
+</html>
